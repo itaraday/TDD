@@ -6,7 +6,7 @@ class NewVisitorTest(unittest.TestCase):
 	def setUp(self):
 		self.browser = webdriver.Firefox()
 		#force browser open for at least 3 seconds
-		self.browser.implicity_wait(3)
+		self.browser.implicitly_wait(3)
 		
 	def tearDown(self):
 		self.browser.quit()
