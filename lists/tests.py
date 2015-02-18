@@ -40,7 +40,7 @@ class HomePageTest(TestCase):
 		#)
 		#self.assertEqual(response.content.decode(), expected_html, "didn't find new list item")		
 	
-	def test_home_reidirects_after_post(self):
+	def test_home_redirects_after_post(self):
 		request = HttpRequest()
 		request.method = 'POST'
 		mytext = 'A new list item'
@@ -49,24 +49,24 @@ class HomePageTest(TestCase):
 		response = home_page(request)
 		
 		self.assertEqual(response.status_code, 302)
-		self.assertEqual(response['location'], '/')
+		self.assertEqual(response['location'], '/lists/My-Only-List')
 	
 	def test_home_page_only_saves_items_when_necessary(self):
 		request = HttpRequest()
 		home_page(request)
 		self.assertEqual(Item.objects.count(),0)
 	
-	def test_home_page_displays_all_list_items(self):
-		Item.objects.create(text='test 1')
-		Item.objects.create(text='test 2')
-		
-		request = HttpRequest()
-		response = home_page(request)
-		
-		self.assertIn('test 1', response.content.decode())
-		self.assertIn('test 2', response.content.decode())
+	#def test_home_page_displays_all_list_items(self):
+	#	Item.objects.create(text='test 1')
+	#	Item.objects.create(text='test 2')
+	#	
+	#	request = HttpRequest()
+	#	response = home_page(request)
+	#	
+	#	self.assertIn('test 1', response.content.decode())
+	#	self.assertIn('test 2', response.content.decode())
 	
-class ItdemModelTest(TestCase):
+class ItemModelTest(TestCase):
 	def test_saving_and_retrieving_items(self):
 		first_item = Item()
 		first_item.text = 'The First (ever) list item'
@@ -80,4 +80,19 @@ class ItdemModelTest(TestCase):
 		self.assertEqual(saved_items.count(),2, "only expected 2 items")
 		self.assertEqual(saved_items[0].text, first_item.text, "item 1 is not saved item 1")
 		self.assertEqual(saved_items[1].text, second_item.text, "item 2 is not saved item 2")
+
+# this will replace most of HomePageTest
+class ListViewTest(TestCase):
+	def test_displays_all_list_items(self):
+		Item.objects.create(text='test 1')
+		Item.objects.create(text='test 2')
+
+		response = self.client.get('/lists/My-Only-List/')
 		
+		self.assertContains(response, 'test 1')
+		self.assertContains(response, 'test 2')
+		
+class ListViewTest(TestCase):
+	def test_uses_list_template(self):
+		response = self.client.get('/lists/My-Only-List/')
+		self.assertTemplateUsed(response, 'list.html')

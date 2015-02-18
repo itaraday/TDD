@@ -22,7 +22,7 @@ class NewVisitorTest(LiveServerTestCase):
 		#checking that homepage works
 		self.browser.get(self.live_server_url)
 		
-		#notice the page header and tiotle mention to-do lists
+		#notice the page header and title mention to-do lists
 		self.assertIn('To-Do', self.browser.title)
 		header_text = self.browser.find_element_by_tag_name('h1').text
 		self.assertIn('To-Do', header_text)
@@ -35,27 +35,55 @@ class NewVisitorTest(LiveServerTestCase):
 		)
 		
 		#use enters 'buy peacock feathers' in input
-		inputbox.send_keys('buy peacock feathers') 
+		user1_input_1 = 'buy peacock feathers'
+		inputbox.send_keys(user1_input_1) 
 		
-		#when she hits enter the page updates and now the page lists 
+		# when she hits enter she is taken to her unique URL and now the page lists 
 		# "1: buy peacock feathers" as an item in a to-do list
-		inputbox.send_keys(Keys.ENTER) 
-		#used to view page, help found CSRF error when form didn't post it
-		#time.sleep(10)
-		self.check_for_row_in_list_table('1: buy peacock feathers')
+		
+		inputbox.send_keys(Keys.ENTER)
+		user_list_url = self.browser.current_url
+		self.assertRegex(user_list_url,'/lists/.+')	
+		##time.sleep(10) used to view page, help found CSRF error when form didn't post it
+		self.check_for_row_in_list_table('1: ' + user1_input_1)
 		
 		# she enters a second item
 		inputbox = self.browser.find_element_by_id('id_new_item')
-		inputbox.send_keys('make hat from feathers')
+		user1_input_2 = 'make hat from feathers'
+		inputbox.send_keys(user1_input_2)
 		inputbox.send_keys(Keys.ENTER) 
 		
 		#page updates with both items in the table now
-		self.check_for_row_in_list_table('1: buy peacock feathers')
-		self.check_for_row_in_list_table('2: make hat from feathers')
+		self.check_for_row_in_list_table('1: ' + user1_input_1)
+		self.check_for_row_in_list_table('2: ' + user1_input_2)
 		
-		#the website generates a unique URL for the user to return to their lists		
-		self.fail('Finish the test!')
-
+		#new user (Zetra) shows update
+		## new browser to make sure none of user 1's info is showing
+		self.browser.quit()
+		self.browser = webdriver.Firefox()
+		
+		# Zetra doesn't see user lists
+		self.browser.get(self.live_server_url)
+		page_text = self.browser.find_element_by_tag_name('body').text
+		self.assertNotIn(user1_input_1,page_text)
+		self.assertNotIn(user1_input_2,page_text)		
+		
+		# zetra starts a new list
+		inputbox = self.browser.find_element_by_id('id_new_item')
+		user2_input_1 = 'buy milk'
+		inputbox.send_keys(user2_input_1)
+		inputbox.send_keys(Keys.ENTER) 		
+		
+		# Zetra gets own url 
+		zetra_list_url = self.browser.current_url
+		self.assertRegex(zetra_list_url,'/lists/.+')	
+		self.assertNotEqual(zetra_list_url, user_list_url)
+		
+		# again make sure no mention of user 1 list in zetra list
+		page_text = self.browser.find_element_by_tag_name('body').text
+		self.assertNotIn(user1_input_1,page_text)
+		self.assertNotIn(user1_input_2,page_text)	
+		self.assertIn(user2_input_1,page_text)
 
 if __name__ == '__main__':
 	unittest.main(warnings='ignore')
