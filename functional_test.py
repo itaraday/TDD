@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 import unittest
 
 
@@ -28,14 +29,17 @@ class NewVisitorTest(unittest.TestCase):
 		)
 		
 		#use enters 'buy peacock feathers' in input
-		input.send_keys('buy peacock feathers') 
+		inputbox.send_keys('buy peacock feathers') 
 		
 		#when she hits enter the page updates and now the page lists 
 		# "1: buy peacock feathers" as an item in a to-do list
-		input.send_keys(keys.ENTER) 
+		inputbox.send_keys(Keys.ENTER) 
 		table = self.browser.find_element_by_id('id_list_table')
-		rows = table.find_element_by_tag_name('tr')
-		self.assertTrue(any(row.text == "1: buy peacock feathers"))
+		rows = table.find_elements_by_tag_name('tr')
+		self.assertTrue(
+			any(row.text == "1: buy peacock feathers" for row in rows),
+			"New to-do item did not appear in table"
+		)
 		
 		# she enters a second time
 		self.fail('Finish the test!')
