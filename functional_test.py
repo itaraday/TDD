@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import unittest
-
+import time
 
 class NewVisitorTest(unittest.TestCase):
 	def setUp(self):
@@ -34,14 +34,24 @@ class NewVisitorTest(unittest.TestCase):
 		#when she hits enter the page updates and now the page lists 
 		# "1: buy peacock feathers" as an item in a to-do list
 		inputbox.send_keys(Keys.ENTER) 
+		#used to view page, help found CSRF error when form didn't post it
+		#time.sleep(10)
 		table = self.browser.find_element_by_id('id_list_table')
 		rows = table.find_elements_by_tag_name('tr')
-		self.assertTrue(
-			any(row.text == "1: buy peacock feathers" for row in rows),
-			"New to-do item did not appear in table"
-		)
+		self.assertIn('1: buy peacock feathers', [row.text for row in rows])
 		
-		# she enters a second time
+		# she enters a second item
+		inputbox = self.browser.find_element_by_id('id_new_item')
+		inputbox.send_keys('make hat from feathers')
+		inputbox.send_keys(Keys.ENTER) 
+		
+		#page updates with both items in the table now
+		table = self.browser.find_element_by_id('id_list_table')
+		rows = table.find_elements_by_tag_name('tr')
+		self.assertIn('1: buy peacock feathers', [row.text for row in rows])
+		self.assertIn('2: make hat from feathers', [row.text for row in rows])
+		
+		#the website generates a unique URL for the user to return to their lists		
 		self.fail('Finish the test!')
 
 
