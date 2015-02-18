@@ -11,7 +11,12 @@ class NewVisitorTest(unittest.TestCase):
 		
 	def tearDown(self):
 		self.browser.quit()
-		
+	
+	def check_for_row_in_list_table(self, row_text):
+		table = self.browser.find_element_by_id('id_list_table')
+		rows = table.find_elements_by_tag_name('tr')
+		self.assertIn(row_text, [row.text for row in rows])		
+	
 	def test_can_start_a_list_and_retrieve_it_later(self):
 		#checking that homepage works
 		self.browser.get('http://localhost:8000')
@@ -36,9 +41,7 @@ class NewVisitorTest(unittest.TestCase):
 		inputbox.send_keys(Keys.ENTER) 
 		#used to view page, help found CSRF error when form didn't post it
 		#time.sleep(10)
-		table = self.browser.find_element_by_id('id_list_table')
-		rows = table.find_elements_by_tag_name('tr')
-		self.assertIn('1: buy peacock feathers', [row.text for row in rows])
+		self.check_for_row_in_list_table('1: buy peacock feathers')
 		
 		# she enters a second item
 		inputbox = self.browser.find_element_by_id('id_new_item')
@@ -46,10 +49,8 @@ class NewVisitorTest(unittest.TestCase):
 		inputbox.send_keys(Keys.ENTER) 
 		
 		#page updates with both items in the table now
-		table = self.browser.find_element_by_id('id_list_table')
-		rows = table.find_elements_by_tag_name('tr')
-		self.assertIn('1: buy peacock feathers', [row.text for row in rows])
-		self.assertIn('2: make hat from feathers', [row.text for row in rows])
+		self.check_for_row_in_list_table('1: buy peacock feathers')
+		self.check_for_row_in_list_table('2: make hat from feathers')
 		
 		#the website generates a unique URL for the user to return to their lists		
 		self.fail('Finish the test!')
