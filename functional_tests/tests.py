@@ -18,6 +18,28 @@ class NewVisitorTest(LiveServerTestCase):
 		rows = table.find_elements_by_tag_name('tr')
 		self.assertIn(row_text, [row.text for row in rows])		
 	
+	def test_layout_and_styling(self):
+		#user goes to homepage
+		self.browser.get(self.live_server_url)
+		self.browser.set_window_size(1024, 764)
+		
+		#notices input box is nicely centered
+		inputbox = self.browser.find_element_by_id('id_new_item')
+		self.assertAlmostEqual(
+			inputbox.location['x'] + inputbox.size['width'] / 2,
+			512,
+			delta=5
+		)
+		
+		inputbox.send_keys('testing\n')
+		inputbox = self.browser.find_element_by_id('id_new_item')
+		self.assertAlmostEqual(
+			inputbox.location['x'] + inputbox.size['width'] / 2,
+			512,
+			delta=5
+		)		
+		
+	
 	def test_can_start_a_list_and_retrieve_it_later(self):
 		#checking that homepage works
 		self.browser.get(self.live_server_url)
