@@ -4,8 +4,23 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import unittest
 import time
+import sys
 
 class NewVisitorTest(StaticLiveServerTestCase):
+	@classmethod
+	def setUpClass(cls):
+		for arg in sys.argv:
+			if 'liveserver' in arg:
+				cls.server_url = 'http://' + arg.split('=')[1]
+				return
+			super().setUpClass()
+			cls.server_url = cls.live_server_url
+			
+	@classmethod
+	def tearDownClass(cls):
+		if cls.server_url == cls.live_server_url:
+			super().tearDownClass()
+	
 	def setUp(self):
 		self.browser = webdriver.Firefox()
 		#force browser open for at least 3 seconds
@@ -21,7 +36,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
 	
 	def test_layout_and_styling(self):
 		#user goes to homepage
-		self.browser.get(self.live_server_url)
+		self.browser.get(self.server_url)
 		self.browser.set_window_size(1024, 764)
 		
 		#notices input box is nicely centered
@@ -43,7 +58,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
 	
 	def test_can_start_a_list_and_retrieve_it_later(self):
 		#checking that homepage works
-		self.browser.get(self.live_server_url)
+		self.browser.get(self.server_url)
 		
 		#notice the page header and title mention to-do lists
 		self.assertIn('To-Do', self.browser.title)
@@ -86,7 +101,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
 		self.browser = webdriver.Firefox()
 		
 		# Zetra doesn't see user lists
-		self.browser.get(self.live_server_url)
+		self.browser.get(self.server_url)
 		page_text = self.browser.find_element_by_tag_name('body').text
 		self.assertNotIn(user1_input_1,page_text)
 		self.assertNotIn(user1_input_2,page_text)		
